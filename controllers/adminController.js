@@ -33,7 +33,6 @@ exports.register = async (req, res, next) => {
         const newUser = {
           _id: user._id,
           username: user.username,
-          idNumber: user.idNumber,
           firstName: user.firstName,
           lastName: user.lastName,
           otherName: user.otherName,
@@ -60,9 +59,8 @@ exports.register = async (req, res, next) => {
 
   // reset password
   exports.changePassword = async (req, res, next) => {
-    const {username,idNumber} = req.query
+    const {username} = req.query
 
-    if(username){
       StaffStudent.findOne({ username },(err, user) => {
         // Check if error connecting
         if (err) {
@@ -86,31 +84,7 @@ exports.register = async (req, res, next) => {
           }
         }
       });
-    }else if(idNumber){
-      StaffStudent.findOne({ idNumber },(err, user) => {
-        // Check if error connecting
-        if (err) {
-          res.json({ success: false, message: err }); // Return error
-        } else {
-          // Check if user was found in database
-          if (!user) {
-            res.json({ success: false, message: 'User not found' }); // Return error, user was not found in db
-          } else {
-            user.changePassword(req.body.oldpassword, req.body.newpassword, function(err) {
-               if(err) {
-                        if(err.name === 'IncorrectPasswordError'){
-                             res.json({ success: false, message: 'Incorrect password' }); // Return error
-                        }else {
-                            res.json({ success: false, message: 'Something went wrong!! Please try again after sometimes.' });
-                        }
-              } else {
-                res.json({ success: true, message: 'Your password has been changed successfully' });
-               }
-             })
-          }
-        }
-      });
-    }
+   
     
   }
 
@@ -138,6 +112,7 @@ exports.login = (req, res, next) => {
         const token = jwt.sign(payLoad, 'myVerySecret');
 
         const newUser = {
+          token,
           _id: user._id,
           username: user.username,
           firstName: user.firstName,
